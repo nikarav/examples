@@ -66,7 +66,7 @@ class ResidualBlock(torch.nn.Module):
         self.in1 = torch.nn.InstanceNorm2d(channels, affine=True)
         self.conv2 = ConvLayer(channels, channels, kernel_size=3, stride=1)
         self.in2 = torch.nn.InstanceNorm2d(channels, affine=True)
-        self.relu = torch.nn.ReLU()
+        self.relu = torch.nn.RReLU()
 
     def forward(self, x):
         residual = x
