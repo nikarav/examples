@@ -31,6 +31,15 @@ def check_paths(args):
 def train(args):
     device = torch.device("cuda" if args.cuda else "cpu")
 
+    # Check if mps is set and available
+    device = torch.device("mps" if args.mac_m1 
+                                    and torch.backends.mps.is_available() 
+                                    and torch.backends.mps.is_built() 
+                                    and not args.cuda
+                                else device)
+
+    print(f'Selected Device is {device}')
+
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
@@ -121,6 +130,15 @@ def train(args):
 
 def stylize(args):
     device = torch.device("cuda" if args.cuda else "cpu")
+
+    # Check if mps is set and available
+    device = torch.device("mps" if args.mac_m1 
+                                    and torch.backends.mps.is_available() 
+                                    and torch.backends.mps.is_built() 
+                                    and not args.cuda
+                                else device)
+
+    print(f'Selected Device is {device}')
 
     content_image = utils.load_image(args.content_image, scale=args.content_scale)
     content_transform = transforms.Compose([
@@ -214,6 +232,8 @@ def main():
                                   help="number of images after which the training loss is logged, default is 500")
     train_arg_parser.add_argument("--checkpoint-interval", type=int, default=2000,
                                   help="number of batches after which a checkpoint of the trained model will be created")
+    train_arg_parser.add_argument("--mac-m1", type=int, default=0,
+                                  help="set to 1 for running on GPU on a Mac with ARM")
 
     eval_arg_parser = subparsers.add_parser("eval", help="parser for evaluation/stylizing arguments")
     eval_arg_parser.add_argument("--content-image", type=str, required=True,
@@ -228,6 +248,8 @@ def main():
                                  help="set it to 1 for running on GPU, 0 for CPU")
     eval_arg_parser.add_argument("--export_onnx", type=str,
                                  help="export ONNX model to a given file")
+    eval_arg_parser.add_argument("--mac-m1", type=int, default=0,
+                                  help="set to 1 for running on GPU on a Mac with ARM")
 
     args = main_arg_parser.parse_args()
 

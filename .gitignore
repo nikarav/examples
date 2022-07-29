@@ -14,6 +14,11 @@ fast_neural_style/saved_models
 fast_neural_style/saved_models.zip
 docs/build
 docs/venv
+fast_neural_style/saved_models
+fast_neural_style/.DS_Store
+fast_neural_style/images/.DS_Store
+.DS_Store
+fast_neural_style/images/imagenette2-320
 
 # vi backups
 *~
