@@ -12,6 +12,8 @@ from torchvision import datasets
 from torchvision import transforms
 import torch.onnx
 
+from image_folder import NewImageFolder
+
 import utils
 from transformer_net import TransformerNet
 from vgg import Vgg16
@@ -49,7 +51,7 @@ def train(args):
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x.mul(255))
     ])
-    train_dataset = datasets.ImageFolder(args.dataset, transform)
+    train_dataset = NewImageFolder(args.dataset, transform)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size)
 
     transformer = TransformerNet().to(device)
@@ -74,8 +76,28 @@ def train(args):
         agg_style_loss = 0.
         count = 0
         for batch_id, (x, _) in enumerate(train_loader):
-            n_batch = len(x)
-            count += n_batch
+            # We need to pick the subset of the images. Since the 
+            # images are shuffled thanks to the NewImageFolder dataloader
+            # we read only the first args.subset images.
+            if count == args.subset:
+                # we have processed the subset for this epoch.
+                break
+            elif count < args.subset and count + len(x) > args.subset:
+                # we can only process a proportion of the current batch.
+                limit = args.subset - count - 1
+                x = x[:limit]
+                n_batch = len(x)
+                count += n_batch
+            else:
+                # count can not be bigger than args.subset.
+                # The only case that is left is the usual 
+                # case of processing the whole batch
+                n_batch = len(x)
+                count += n_batch
+            
+            print(f'Epoch: {e}, batch_id: {batch_id}, n_batch: {n_batch}, count: {count}')
+
+            
             optimizer.zero_grad()
 
             x = x.to(device)
@@ -234,6 +256,8 @@ def main():
                                   help="number of batches after which a checkpoint of the trained model will be created")
     train_arg_parser.add_argument("--mac-m1", type=int, default=0,
                                   help="set to 1 for running on GPU on a Mac with ARM")
+    train_arg_parser.add_argument("--subset", type=int, default=100,
+                                  help="number of elements to pick from dataset")
 
     eval_arg_parser = subparsers.add_parser("eval", help="parser for evaluation/stylizing arguments")
     eval_arg_parser.add_argument("--content-image", type=str, required=True,
