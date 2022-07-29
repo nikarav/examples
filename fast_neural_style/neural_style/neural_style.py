@@ -18,6 +18,12 @@ import utils
 from transformer_net import TransformerNet
 from vgg import Vgg16
 
+def rotation_string_split(value):
+    rotation = value
+    if isinstance(value, str) and ',' in value:
+        temp = rotation.split(',')
+        rotation = (temp[0], temp[1])
+    return rotation
 
 def check_paths(args):
     try:
@@ -45,9 +51,13 @@ def train(args):
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
+    degrees = rotation_string_split(args.rotation_degrees)
+    fill = rotation_string_split(args.rotation_fill)
+
     transform = transforms.Compose([
         transforms.Resize(args.image_size),
         transforms.CenterCrop(args.image_size),
+        transforms.RandomRotation(degrees, fill=fill),
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x.mul(255))
     ])
@@ -217,7 +227,6 @@ def stylize_onnx(content_image, args):
 
     return torch.from_numpy(img_out_y)
 
-
 def main():
     main_arg_parser = argparse.ArgumentParser(description="parser for fast-neural-style")
     subparsers = main_arg_parser.add_subparsers(title="subcommands", dest="subcommand")
@@ -258,6 +267,10 @@ def main():
                                   help="set to 1 for running on GPU on a Mac with ARM")
     train_arg_parser.add_argument("--subset", type=int, default=100,
                                   help="number of elements to pick from dataset")
+    train_arg_parser.add_argument("--rotation-degrees", type=str, default=0,
+                                  help="degrees of rotation. Either a number or a sequence like min,max")
+    train_arg_parser.add_argument("--rotation-fill", type=str, default=0,
+                                  help="pixel fill value for the area outside the rotated")
 
     eval_arg_parser = subparsers.add_parser("eval", help="parser for evaluation/stylizing arguments")
     eval_arg_parser.add_argument("--content-image", type=str, required=True,
