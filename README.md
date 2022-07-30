@@ -18,7 +18,7 @@ This project is an extension of the [fast-neural-style](https://github.com/pytor
 # Setup 
 MacOS Monterey was used to develop and run the models. As of the newest update, Pytorch uses Apple’s Metal Performance Shaders (MPS) as a backend, thus enabling high-performance training on GPU.
 
-Therfore, a new argument is created in the **fast-neural-style** example **(*--mac-m1***) in order to enable training on GPU. The flag is either 1 or 0(default), indicating that we run on MacOS or not, respectively.
+Therefore, a new argument is created in the **fast-neural-style** example **(*--mac-m1)*** in order to enable training on GPU. The flag is either 1 or 0 (default), indicating that we run on MacOS or not, respectively.
 
 
 > **_NOTE:_**  The M1-GPU support feature is supported only in MacOS Monterey (12.3+).
@@ -49,13 +49,13 @@ The output image is stored in *fast_neural_style/images/output-images/mosaic_soc
 
 ## New Dataset 
 
-For the purpose of this task, the 320px version of [Imagenette](https://github.com/fastai/imagenette) is used. A subset of 100 images is used and 10 epochs selected to train the model. 
+For the purpose of this task, the 320px version of [Imagenette](https://github.com/fastai/imagenette) is used. A subset of 100 images is used and the model is trained for 10 epochs. 
 
-The images are randomly picked during training time and a new argument(***--subset***) is created in order to select the size of the subset(default: 100).
+The images are randomly picked during training time and a new argument(***--subset***) is created in order to select the size of the subset (default: 100).
 
 **The subset should be picked during training time and not as a preprossing step.** 
 
-The interpretation of this sentence could have 2 meanings. The preprocessing step could either mean manually selecting a subset of the images and putting them in a folder or it could include the part of loading the dataset and parsing it to the DataLoader.  If the former is true then the subset could be selected by adding the following lines of code before the DataLoader:
+The interpretation of this sentence could have 2 meanings. The "preprocessing step" could either mean manually selecting a subset of the images and placing them inside a folder or it could also include the part of loading the dataset and parsing it to the DataLoader. If the former is true then the subset could be selected by adding the following lines of code before the DataLoader:
 
 ```
 train_dataset = datasets.ImageFolder(args.dataset, transform)
@@ -70,9 +70,9 @@ For this task we consider the latter to be true and the implementation is descri
 
 
 ### Train 
-Since the part before the DataLoader is considered as preprocessing step we have to pick the subset inside each epoch. 
+Since the part before the DataLoader is considered as part of preprocessing step we have to pick the subset inside each epoch. 
 
-A new data loader similar to the ImageFolder is implemented. The main difference is that the samples containing the paths of the images are shuffled. Therefore, during each epoch we can pick from the start batches of data until we reach the desired size of the subset and the result would be a subset of images from many classes(Imagenette has a total of 10 classes). If we use the usual ImageFolder then the model would be trained by images of the same class.
+A new data loader similar to the ImageFolder is implemented. The main difference is that the samples containing the paths of the images are shuffled. Therefore, during each epoch, we can pick batches of data from the start until we reach the desired size of the subset. The result will be a subset of images from many classes (Imagenette has a total of 10 classes). If we use the usual ImageFolder then the model would be trained by images of the same class.
 
 ***DataLoader* is implemented with shuffle=False, which guarantees that the batches will have the same order during each epoch.**
 
@@ -120,7 +120,7 @@ Similarly as before, we get the image stored in *fast_neural_style/images/output
 ## Activation function
 The purpose of this task is to change the activation function in the residual block of the transformer network from **ReLU** to **RReLU**.
 
-> **_NOTE:_** The operator 'aten::rrelu_with_noise' is not current implemented for the MPS device(MacOS). As a consequence, the model was trained and the style was done using CPU.
+> **_NOTE:_** The operator 'aten::rrelu_with_noise' is not currently implemented for the MPS device (MacOS). Hence, the model was trained and the style was done using the CPU.
 
 <a name="train2"></a>
 ### Train
@@ -142,4 +142,4 @@ python neural_style/neural_style.py
 
 <a name="style2"></a>
 ### Style
-Using the new model we get the image stored in *fast_neural_style/images/output-images/mosaic_soccer_ball_5.jpeg*
+Using the new model we get the image stored in *fast_neural_style/images/output-images/mosaic_soccer_ball_5.jpeg*.
